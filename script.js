@@ -1,17 +1,29 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const gameOverPopup = document.getElementById('gameOverPopup');
+const startScreen = document.getElementById('startScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const finalScore = document.getElementById('finalScore');
+const birdImg = new Image();
+const pipeImg = new Image();
+const backgroundImg = new Image();
 
 let bird, pipes, score, frame, gameRunning;
 
+birdImg.src = 'assets/bird.png';
+pipeImg.src = 'assets/pipe.png';
+backgroundImg.src = 'assets/background.png';
+
 function startGame() {
-    bird = { x: 50, y: 150, width: 20, height: 20, gravity: 0.3, velocity: 0, lift: -5 };
-    pipes = [];  
+    startScreen.style.display = 'none';
+    document.getElementById('gameContainer').style.display = 'block';
+
+    bird = { x: 50, y: 150, width: 30, height: 24, gravity: 0.3, velocity: 0, lift: -5 };
+    pipes = [];
     score = 0;
-    frame = 0;   
+    frame = 0;
     gameRunning = true;
-    gameOverPopup.style.display = 'none';
-    gameLoop(); 
+    gameOverScreen.style.display = 'none';
+    gameLoop();
 }
 
 function updateBird() {
@@ -24,8 +36,7 @@ function updateBird() {
 }
 
 function drawBird() {
-    ctx.fillStyle = 'yellow';
-    ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+    ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 }
 
 function updatePipes() {
@@ -37,14 +48,14 @@ function updatePipes() {
     }
 
     pipes.forEach((pipe, index) => {
-        pipe.x -= 2 ; 
+        pipe.x -= 1.5;
 
         if (pipe.x + 50 < 0) {
             pipes.splice(index, 1);
             score++;
         }
 
-        if (bird.x < pipe.x + 50 && bird.x + bird.width > pipe.x && 
+        if (bird.x < pipe.x + 50 && bird.x + bird.width > pipe.x &&
             (bird.y < pipe.top || bird.y + bird.height > canvas.height - pipe.bottom)) {
             showGameOver();
         }
@@ -52,10 +63,9 @@ function updatePipes() {
 }
 
 function drawPipes() {
-    ctx.fillStyle = 'green';
     pipes.forEach(pipe => {
-        ctx.fillRect(pipe.x, 0, 50, pipe.top);
-        ctx.fillRect(pipe.x, canvas.height - pipe.bottom, 50, pipe.bottom);
+        ctx.drawImage(pipeImg, pipe.x, 0, 50, pipe.top);
+        ctx.drawImage(pipeImg, pipe.x, canvas.height - pipe.bottom, 50, pipe.bottom);
     });
 }
 
@@ -67,13 +77,15 @@ function drawScore() {
 
 function showGameOver() {
     gameRunning = false;
-    gameOverPopup.style.display = 'block';
+    finalScore.innerText = `Your Score: ${score}`;
+    document.getElementById('gameContainer').style.display = 'none';
+    gameOverScreen.style.display = 'block';
 }
 
 function gameLoop() {
     if (!gameRunning) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
     updateBird();
     drawBird();
     updatePipes();
@@ -94,4 +106,4 @@ function restartGame() {
     startGame();
 }
 
-startGame();
+// The game starts when the player clicks the start button

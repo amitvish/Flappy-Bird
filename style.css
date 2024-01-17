@@ -8,7 +8,7 @@ body {
     font-family: 'Arial', sans-serif;
 }
 
-#gameContainer {
+.screen {
     text-align: center;
 }
 
@@ -26,7 +26,7 @@ body {
     text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
 }
 
-.game-over-popup {
+.game-over-popup, .start-screen {
     display: none;
     position: fixed;
     top: 50%;
@@ -39,12 +39,12 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.game-over-popup p {
+.game-over-popup p, .start-screen p {
     font-size: 20px;
     color: #000;
 }
 
-.game-over-popup button {
+.game-over-popup button, .start-screen button {
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 16px;

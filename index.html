@@ -5,15 +5,22 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <div id="gameContainer">
+    <div id="startScreen" class="screen">
         <h1>Flappy Bird Clone</h1>
-        <canvas id="gameCanvas" width="320" height="480"></canvas>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="gameContainer" class="screen" style="display: none;">
+        <canvas id="gameCanvas" width="640" height="359"></canvas>
         <div id="score" class="score"></div>
     </div>
-    <div id="gameOverPopup" class="game-over-popup">
+
+    <div id="gameOverScreen" class="screen" style="display: none;">
         <p>Game Over</p>
+        <p id="finalScore"></p>
         <button onclick="restartGame()">Restart</button>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
