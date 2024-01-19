@@ -6,6 +6,7 @@ const finalScore = document.getElementById('finalScore');
 const birdImg = new Image();
 const pipeImg = new Image();
 const backgroundImg = new Image();
+const backgroundMusic = new Audio('assets/background-music.mp3'); // Add the path to your background music
 
 let bird, pipes, score, frame, gameRunning;
 
@@ -23,6 +24,11 @@ function startGame() {
     frame = 0;
     gameRunning = true;
     gameOverScreen.style.display = 'none';
+    
+    // Start playing background music
+    backgroundMusic.loop = true; // Loop the music
+    backgroundMusic.play();
+    
     gameLoop();
 }
 
@@ -55,7 +61,6 @@ function updatePipes() {
             score++;
         }
 
-        // Improved collision detection
         if (checkCollision(bird, pipe)) {
             showGameOver();
             return;
@@ -98,7 +103,7 @@ function checkCollision(bird, pipe) {
     return false; // No collision
 }
 
-const PIPE_WIDTH = 80; // Adjust this value to change the pipe thickness
+const PIPE_WIDTH = 80;
 
 function drawPipes() {
     pipes.forEach(pipe => {
@@ -106,7 +111,6 @@ function drawPipes() {
         ctx.drawImage(pipeImg, pipe.x, canvas.height - pipe.bottom, PIPE_WIDTH, pipe.bottom);
     });
 }
-
 
 function drawScore() {
     ctx.fillStyle = '#000';
@@ -116,11 +120,12 @@ function drawScore() {
 
 function showGameOver() {
     gameRunning = false;
+    backgroundMusic.pause(); // Pause the background music
     setTimeout(function() {
         finalScore.innerText = `Your Score: ${score}`;
         document.getElementById('gameContainer').style.display = 'none';
         gameOverScreen.style.display = 'block';
-    }, 1000); // Delay of 1000 milliseconds (1 second)
+    }, 1000);
 }
 
 function gameLoop() {
