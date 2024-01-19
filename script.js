@@ -44,7 +44,7 @@ function updatePipes() {
         let gap = 120;
         let pipeTopHeight = Math.floor(Math.random() * (canvas.height - gap));
         let pipeBottomHeight = canvas.height - pipeTopHeight - gap;
-        pipes.push({ x: canvas.width, top: pipeTopHeight, bottom: pipeBottomHeight });
+        pipes.push({ x: canvas.width, top: pipeTopHeight, bottom: pipeBottomHeight, width: PIPE_WIDTH });
     }
 
     pipes.forEach((pipe, index) => {
@@ -55,19 +55,58 @@ function updatePipes() {
             score++;
         }
 
-        if (bird.x < pipe.x + 50 && bird.x + bird.width > pipe.x &&
-            (bird.y < pipe.top || bird.y + bird.height > canvas.height - pipe.bottom)) {
+        // Improved collision detection
+        if (checkCollision(bird, pipe)) {
             showGameOver();
+            return;
         }
     });
 }
 
+function checkCollision(bird, pipe) {
+    // Define the effective bounding box of the bird
+    let birdLeft = bird.x;
+    let birdRight = bird.x + bird.width;
+    let birdTop = bird.y;
+    let birdBottom = bird.y + bird.height;
+
+    // Define the effective bounding boxes of the pipe
+    let pipeTopX = pipe.x;
+    let pipeTopY = 0;
+    let pipeBottomX = pipe.x;
+    let pipeBottomY = canvas.height - pipe.bottom;
+    let pipeRight = pipe.x + PIPE_WIDTH;
+
+    let overlapTolerance = 25; // Horizontal tolerance for side collision
+    let verticalTolerance = 0; // Vertical tolerance for top and bottom collision
+
+
+    // Check collision with top pipe
+    if (birdRight > pipeTopX + overlapTolerance && birdLeft < pipeTopX + 50 - overlapTolerance) {
+        if (birdTop < pipe.top + verticalTolerance) {
+            return true; // Collision with top pipe
+        }
+    }
+
+    // Check collision with bottom pipe
+    if (birdRight > pipeBottomX + overlapTolerance && birdLeft < pipeBottomX + 50 - overlapTolerance) {
+        if (birdBottom > pipeBottomY - verticalTolerance) {
+            return true; // Collision with bottom pipe
+        }
+    }
+
+    return false; // No collision
+}
+
+const PIPE_WIDTH = 80; // Adjust this value to change the pipe thickness
+
 function drawPipes() {
     pipes.forEach(pipe => {
-        ctx.drawImage(pipeImg, pipe.x, 0, 50, pipe.top);
-        ctx.drawImage(pipeImg, pipe.x, canvas.height - pipe.bottom, 50, pipe.bottom);
+        ctx.drawImage(pipeImg, pipe.x, 0, PIPE_WIDTH, pipe.top);
+        ctx.drawImage(pipeImg, pipe.x, canvas.height - pipe.bottom, PIPE_WIDTH, pipe.bottom);
     });
 }
+
 
 function drawScore() {
     ctx.fillStyle = '#000';
@@ -77,9 +116,11 @@ function drawScore() {
 
 function showGameOver() {
     gameRunning = false;
-    finalScore.innerText = `Your Score: ${score}`;
-    document.getElementById('gameContainer').style.display = 'none';
-    gameOverScreen.style.display = 'block';
+    setTimeout(function() {
+        finalScore.innerText = `Your Score: ${score}`;
+        document.getElementById('gameContainer').style.display = 'none';
+        gameOverScreen.style.display = 'block';
+    }, 1000); // Delay of 1000 milliseconds (1 second)
 }
 
 function gameLoop() {

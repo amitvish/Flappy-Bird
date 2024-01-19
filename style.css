@@ -12,6 +12,22 @@ body {
     text-align: center;
 }
 
+button {
+    background-color: #007bff;;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
 #gameCanvas {
     background-color: #FFFFFF;
     border: 5px solid #000000;
