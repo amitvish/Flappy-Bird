@@ -150,6 +150,8 @@ document.addEventListener('keydown', function(event) {
 
 function restartGame() {
     startGame();
+    backgroundMusic.currentTime = 0;
+    backgroundMusic.play();
 }
 
 // The game starts when the player clicks the start button
