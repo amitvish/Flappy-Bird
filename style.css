@@ -111,3 +111,23 @@ button:hover {
     font-size: 16px;
     cursor: pointer;
 }
+
+@media (max-width: 480px) {
+    #gameOverScreen {
+        width: calc(100% - 24px);
+        min-width: 0;
+        padding: 12px;
+    }
+
+    #gameOverScreen p {
+        margin: 6px 0;
+        font-size: 16px;
+    }
+
+    #gameOverScreen button {
+        min-height: 38px;
+        margin-top: 6px;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+}
