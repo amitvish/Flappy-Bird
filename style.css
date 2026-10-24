@@ -2,14 +2,20 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
+    padding: 16px;
+    box-sizing: border-box;
     background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
     font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    touch-action: manipulation;
 }
 
 .screen {
     text-align: center;
+    max-width: 100%;
 }
 
 button {
@@ -22,6 +28,8 @@ button {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    min-height: 44px;
+    touch-action: manipulation;
 }
 
 button:hover {
@@ -29,10 +37,47 @@ button:hover {
 }
 
 #gameCanvas {
+    display: block;
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    box-sizing: border-box;
     background-color: #FFFFFF;
     border: 5px solid #000000;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
+}
+
+#gameContainer {
+    position: relative;
+    width: min(640px, 100%);
+}
+
+#gameOverScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    min-width: 180px;
+    max-width: calc(100% - 32px);
+    box-sizing: border-box;
+    padding: 20px;
+    transform: translate(-50%, -50%);
+    background-color: rgba(242, 242, 242, 0.92);
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#gameOverScreen p {
+    font-size: 20px;
+    color: #000;
+}
+
+#gameOverScreen button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 16px;
 }
 
 .score {

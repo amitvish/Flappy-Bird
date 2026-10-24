@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Flappy Bird Clone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
@@ -19,9 +20,7 @@
     <div id="gameContainer" class="screen" style="display: none;">
         <canvas id="gameCanvas" width="640" height="359"></canvas>
         <div id="score" class="score"></div>
-    </div>
-
-    <div id="gameOverScreen" class="screen" style="display: none;">
+        <div id="gameOverScreen" class="screen" style="display: none;">
             <p>Game Over</p>
             <p id="finalScore"></p>
             <button onclick="restartGame()">Restart</button>

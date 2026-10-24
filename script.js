@@ -7,8 +7,14 @@ const birdImg = new Image();
 const pipeImg = new Image();
 const backgroundImg = new Image();
 const backgroundMusic = new Audio('assets/background-music.mp3'); // Add the path to your background music
+const PIPE_WIDTH = 80;
+const PIPE_SPAWN_INTERVAL = 120;
+const INITIAL_PIPE_COUNT = 3;
+const BIRD_HITBOX_PADDING = 4;
+const PIPE_HORIZONTAL_COLLISION_PADDING = 28;
+const PIPE_VERTICAL_COLLISION_PADDING = 2;
 
-let bird, pipes, score, frame, gameRunning;
+let bird, pipes, score, frame, gameRunning, gameOver;
 
 birdImg.src = 'assets/bird.png';
 pipeImg.src = 'assets/pipe.png';
@@ -18,15 +24,17 @@ function startGame() {
     startScreen.style.display = 'none';
     document.getElementById('gameContainer').style.display = 'block';
 
-    bird = { x: 50, y: 150, width: 30, height: 24, gravity: 0.3, velocity: 0, lift: -5 };
+    bird = { x: 50, y: 150, width: 30, height: 24, gravity: 0.15, velocity: 0, lift: -4 };
     pipes = [];
     score = 0;
     frame = 0;
     gameRunning = true;
+    gameOver = false;
     gameOverScreen.style.display = 'none';
     
     // Start playing background music
     backgroundMusic.loop = true; // Loop the music
+    backgroundMusic.currentTime = 0;
     backgroundMusic.play();
     
     gameLoop();
@@ -46,15 +54,17 @@ function drawBird() {
 }
 
 function updatePipes() {
-    if (frame % 90 === 0) {
-        let gap = 120;
-        let pipeTopHeight = Math.floor(Math.random() * (canvas.height - gap));
-        let pipeBottomHeight = canvas.height - pipeTopHeight - gap;
-        pipes.push({ x: canvas.width, top: pipeTopHeight, bottom: pipeBottomHeight, width: PIPE_WIDTH });
+    if (frame === 0) {
+        // Seed the opening with three pipes before regular spawning begins.
+        for (let index = 0; index < INITIAL_PIPE_COUNT; index++) {
+            addPipe(canvas.width / 2 + index * PIPE_SPAWN_INTERVAL);
+        }
+    } else if (frame % PIPE_SPAWN_INTERVAL === 0) {
+        addPipe(canvas.width);
     }
 
     pipes.forEach((pipe, index) => {
-        pipe.x -= 1.5;
+        pipe.x -= 1;
 
         if (pipe.x + 50 < 0) {
             pipes.splice(index, 1);
@@ -68,46 +78,41 @@ function updatePipes() {
     });
 }
 
-function checkCollision(bird, pipe) {
-    // Define the effective bounding box of the bird
-    let birdLeft = bird.x;
-    let birdRight = bird.x + bird.width;
-    let birdTop = bird.y;
-    let birdBottom = bird.y + bird.height;
-
-    // Define the effective bounding boxes of the pipe
-    let pipeTopX = pipe.x;
-    let pipeTopY = 0;
-    let pipeBottomX = pipe.x;
-    let pipeBottomY = canvas.height - pipe.bottom;
-    let pipeRight = pipe.x + PIPE_WIDTH;
-
-    let overlapTolerance = 25; // Horizontal tolerance for side collision
-    let verticalTolerance = 0; // Vertical tolerance for top and bottom collision
-
-
-    // Check collision with top pipe
-    if (birdRight > pipeTopX + overlapTolerance && birdLeft < pipeTopX + 50 - overlapTolerance) {
-        if (birdTop < pipe.top + verticalTolerance) {
-            return true; // Collision with top pipe
-        }
-    }
-
-    // Check collision with bottom pipe
-    if (birdRight > pipeBottomX + overlapTolerance && birdLeft < pipeBottomX + 50 - overlapTolerance) {
-        if (birdBottom > pipeBottomY - verticalTolerance) {
-            return true; // Collision with bottom pipe
-        }
-    }
-
-    return false; // No collision
+function addPipe(x) {
+    let gap = 120;
+    let pipeTopHeight = Math.floor(Math.random() * (canvas.height - gap));
+    let pipeBottomHeight = canvas.height - pipeTopHeight - gap;
+    pipes.push({ x, top: pipeTopHeight, bottom: pipeBottomHeight, width: PIPE_WIDTH });
 }
 
-const PIPE_WIDTH = 80;
+function checkCollision(bird, pipe) {
+    // Use a slightly smaller hitbox so near-misses do not end the game.
+    const birdLeft = bird.x + BIRD_HITBOX_PADDING;
+    const birdRight = bird.x + bird.width - BIRD_HITBOX_PADDING;
+    const birdTop = bird.y + BIRD_HITBOX_PADDING;
+    const birdBottom = bird.y + bird.height - BIRD_HITBOX_PADDING;
+    // Side collisions require deeper horizontal overlap than top/bottom hits.
+    const pipeLeft = pipe.x + PIPE_HORIZONTAL_COLLISION_PADDING;
+    const pipeRight = pipe.x + PIPE_WIDTH - PIPE_HORIZONTAL_COLLISION_PADDING;
+    const topPipeBottom = pipe.top - PIPE_VERTICAL_COLLISION_PADDING;
+    const bottomPipeTop = canvas.height - pipe.bottom + PIPE_VERTICAL_COLLISION_PADDING;
+
+    const overlapsHorizontally = birdRight > pipeLeft && birdLeft < pipeRight;
+    if (!overlapsHorizontally) return false;
+
+    // The bird must actually overlap either pipe's vertical area.
+    return birdTop < topPipeBottom || birdBottom > bottomPipeTop;
+}
 
 function drawPipes() {
     pipes.forEach(pipe => {
-        ctx.drawImage(pipeImg, pipe.x, 0, PIPE_WIDTH, pipe.top);
+        // Flip the top pipe so its cap faces down into the gap.
+        ctx.save();
+        ctx.translate(pipe.x, pipe.top);
+        ctx.scale(1, -1);
+        ctx.drawImage(pipeImg, 0, 0, PIPE_WIDTH, pipe.top);
+        ctx.restore();
+
         ctx.drawImage(pipeImg, pipe.x, canvas.height - pipe.bottom, PIPE_WIDTH, pipe.bottom);
     });
 }
@@ -119,13 +124,13 @@ function drawScore() {
 }
 
 function showGameOver() {
+    if (!gameRunning) return;
+
     gameRunning = false;
+    gameOver = true;
     backgroundMusic.pause(); // Pause the background music
-    setTimeout(function() {
-        finalScore.innerText = `Your Score: ${score}`;
-        document.getElementById('gameContainer').style.display = 'none';
-        gameOverScreen.style.display = 'block';
-    }, 1000);
+    finalScore.innerText = `Your Score: ${score}`;
+    gameOverScreen.style.display = 'block';
 }
 
 function gameLoop() {
@@ -143,15 +148,38 @@ function gameLoop() {
 }
 
 document.addEventListener('keydown', function(event) {
-    if (event.key === ' ' && gameRunning) {
-        bird.velocity = bird.lift;
+    if (event.code === 'Space') {
+        event.preventDefault();
+
+        if (gameOver) {
+            restartGame();
+            return;
+        }
+
+        if (gameRunning) {
+            bird.velocity = bird.lift;
+        }
     }
 });
 
+document.addEventListener('touchstart', function(event) {
+    // Keep buttons usable without also triggering a flap or restart.
+    if (event.target.closest && event.target.closest('button')) return;
+
+    event.preventDefault();
+
+    if (gameOver) {
+        restartGame();
+        return;
+    }
+
+    if (gameRunning) {
+        bird.velocity = bird.lift;
+    }
+}, { passive: false });
+
 function restartGame() {
     startGame();
-    backgroundMusic.currentTime = 0;
-    backgroundMusic.play();
 }
 
 // The game starts when the player clicks the start button
