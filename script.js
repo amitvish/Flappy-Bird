@@ -14,13 +14,18 @@ const BIRD_HITBOX_PADDING = 4;
 const PIPE_HORIZONTAL_COLLISION_PADDING = 28;
 const PIPE_VERTICAL_COLLISION_PADDING = 2;
 
-let bird, pipes, score, frame, gameRunning, gameOver;
+let bird, pipes, score, frame, gameRunning, gameOver, animationFrameId = null;
 
 birdImg.src = 'assets/bird.png';
 pipeImg.src = 'assets/pipe.png';
 backgroundImg.src = 'assets/background.png';
 
 function startGame() {
+    if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
     startScreen.style.display = 'none';
     document.getElementById('gameContainer').style.display = 'block';
 
@@ -134,8 +139,12 @@ function showGameOver() {
 }
 
 function gameLoop() {
-    if (!gameRunning) return;
+    if (!gameRunning) {
+        animationFrameId = null;
+        return;
+    }
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
     updateBird();
     drawBird();
@@ -144,7 +153,11 @@ function gameLoop() {
     drawScore();
 
     frame++;
-    requestAnimationFrame(gameLoop);
+    if (gameRunning) {
+        animationFrameId = requestAnimationFrame(gameLoop);
+    } else {
+        animationFrameId = null;
+    }
 }
 
 document.addEventListener('keydown', function(event) {
